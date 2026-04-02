@@ -563,6 +563,68 @@ Parents receive a read-only view of their child's tagged event photos, provided 
 
 ---
 
+## 11. WhatsApp Notifications
+
+Parents receive automated WhatsApp messages for the events that matter most — the channel they already check.
+
+### Features
+- **Absence Alert via WhatsApp:** If push notification undelivered within 5 minutes, WhatsApp message sent: "Aarav (10A) was marked absent today."
+- **Fee Reminder:** "Fee of ₹12,500 for Q2 is due on Nov 30. Pay here: [link]"
+- **Homework Alert:** "New homework posted in Mathematics for 10A. Due: Nov 20."
+- **Acknowledge:** Parent can reply "OK" to acknowledge a critical notice — logged as read receipt.
+
+### Technical Implementation
+- Delivery chain: Expo push → 5-min BullMQ delay check → if `UserNotificationState.deliveredAt` is null → Gupshup/Interakt WhatsApp API → if failed → MSG91 SMS
+- Template IDs stored in `WhatsAppConfig.enabledTriggers` — only pre-approved TRAI templates sent
+- Parent opt-out: `UserPreferences.whatsappOptOut boolean` — skips WhatsApp step if true
+
+---
+
+## 12. PTM Slot Booking
+
+### Features
+- **Browse Available Slots:** For each PTM event, parent sees teacher-wise time slots and books one.
+- **Multi-Child Handling:** If parent has two children with the same teacher, system warns of conflict and suggests adjacent slots.
+- **Booking Confirmation:** Push + WhatsApp confirmation with slot details after booking.
+- **Cancellation:** Cancel up to 2 hours before PTM; slot released to next parent on waitlist.
+- **Post-PTM Notes:** After the meeting, teacher's notes appear in the child's profile — parent can read but not edit.
+
+### Technical Implementation
+- **`GET /api/v1/parents/ptm/:ptmEventId/slots?teacherId=`** → available slots list
+- **`POST /api/v1/parents/ptm/bookings`** → `{ slotId, childId }` — idempotent, prevents double-booking same slot
+- **`DELETE /api/v1/parents/ptm/bookings/:id`** — cancellation with 2hr cutoff check
+- **`GET /api/v1/parents/children/:childId/ptm/notes`** — post-PTM notes for the child
+
+---
+
+## 13. Report Card View
+
+### Features
+- **Board-Specific Report Card:** View child's report card in the format matching their school's board (CBSE/ICSE/State Board).
+- **Subject-Wise Breakdown:** Marks per exam type and final computed grade.
+- **Historical Report Cards:** Past sessions available for download.
+- **Download PDF:** Save report card to device for offline reference or printing.
+
+### Technical Implementation
+- **`GET /api/v1/parents/children/:childId/report-cards?sessionId=`** → `[{ session, subjectResults, coScholastic, reportCardUrl }]`
+- `reportCardUrl`: pre-signed S3 URL (1-hour TTL) to generated PDF
+- `ParentOwnsChildGuard` enforced on all report card routes
+
+---
+
+## 14. Library — Child's Borrowing Status
+
+### Features
+- **Current Borrowed Books:** View books currently issued to the child with due dates.
+- **Overdue Warning:** Red indicator if any book is overdue; shows accumulated fine.
+- **Borrowing History:** Past issues and return dates.
+
+### Technical Implementation
+- **`GET /api/v1/parents/children/:childId/library/issues?status=active|all`** → issued books list
+- Read-only — parent cannot issue or return books.
+
+---
+
 ## 10. Technical Edge Cases & Considerations (Indian Context)
 
 1. **Shared Phone Numbers:** The most common scenario — both parents use one number for school records. Authenticate the phone number, attaching it to a single `ParentProfile`. All children linked to that number are accessible from one account. Do not create two separate accounts for the same phone number.

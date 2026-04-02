@@ -757,6 +757,97 @@ enum CalendarEventType { HOLIDAY EXAM PTM EVENT OTHER }
 
 ---
 
+## 12. WhatsApp Integration (Admin Configuration)
+
+### Features
+- **WhatsApp Channel Setup:** Admin connects school's WhatsApp Business account via Gupshup/Interakt API credentials in school settings.
+- **Event Triggers:** Configure which events send WhatsApp messages — absence alerts, fee reminders, homework posted, urgent broadcasts.
+- **Template Management:** View all registered DLT templates and their approval status.
+- **Delivery Analytics:** Per-broadcast WhatsApp delivery and read rates alongside push and SMS metrics.
+
+### Technical Implementation
+- `WhatsAppConfig` model: `schoolId`, `apiKey`, `phoneNumberId`, `enabledTriggers (JSON)`, `isActive`
+- Stored encrypted in DB; `apiKey` never exposed via API response.
+- Admin portal shows per-trigger toggle: Absence Alert ✓, Fee Reminder ✓, Homework ✗, Urgent Broadcast ✓
+- Delivery stats aggregated from Gupshup/Interakt webhook callbacks into `UserNotificationState`
+
+---
+
+## 13. Board-Specific Grading & Report Cards
+
+### Features
+- **Board Configuration:** Select school board (CBSE / ICSE / State Board) during onboarding; determines default grading scheme.
+- **Grading Scheme Editor:** Define grade slabs (e.g., A1 = 91–100, B2 = 71–80) or percentage thresholds.
+- **Exam Weightage Setup:** Configure weightage for each exam type per session (Unit Test 20%, Half-Yearly 30%, Annual 50%).
+- **Co-scholastic Areas (CBSE):** Define activity areas and attitude/value parameters with grade inputs per student.
+- **Report Card Templates:** Upload or configure board-specific PDF templates with school logo and letterhead.
+- **Bulk Report Card Generation:** Generate PDFs for an entire class in one job — downloadable as ZIP.
+- **UDISE+ Export:** Generate enrollment and performance data in the format required for UDISE+ portal submission.
+
+### Technical Implementation
+- `GradingScheme` model: `schoolId`, `board`, `slabs (JSON)`, `sessionId`
+- `ExamWeightage` model: `schoolId`, `sessionId`, `examType`, `weightPercent`
+- `MarksEntry` model: `studentId`, `subjectId`, `examType`, `marksObtained`, `maxMarks`, `enteredById`
+- `CoscholasticRecord` (CBSE only): `studentId`, `sessionId`, `area`, `grade`
+- Report card PDF: BullMQ `report-card-generation` job → Puppeteer + Handlebars template per board
+- Bulk generation: one job per class → ZIP archive → S3 → admin download link
+
+---
+
+## 14. Admission & Enrollment Management
+
+### Features
+- **Inquiry Dashboard:** View and manage all admission inquiries with status filters (New, Applied, Interview Scheduled, Admitted, Rejected).
+- **Online Form Configuration:** Customize which fields and documents are required for admission.
+- **Seat Management:** Set seat capacity per class/section; system blocks applications when full.
+- **Waitlist Management:** Auto-rank waitlisted applicants; auto-notify on seat opening.
+- **TC Generation:** Issue Transfer Certificates (PDF) for outgoing students with configurable school letterhead.
+- **Bulk Enrollment:** Convert admitted applicants to enrolled students in bulk at session start.
+
+### Technical Implementation
+- `AdmissionInquiry` model: `schoolId`, `applicantName`, `classApplying`, `parentName`, `parentPhone`, `source` (WALKIN/REFERRAL/ONLINE), `status`, `documents[]`, `createdAt`
+- Status FSM: `INQUIRY → APPLIED → INTERVIEW → ADMITTED | REJECTED`; each transition logs `adminId` + `timestamp`
+- Documents: S3 upload under `admissions/{inquiryId}/{docType}.{ext}` — private bucket, pre-signed URL access only
+- TC PDF: Puppeteer job with school-configurable template (name, admission no, date of leaving, conduct, reason)
+- Bulk enrollment: Prisma `$transaction` creates `User` + `StudentProfile` + `ParentProfile` per admitted inquiry
+
+---
+
+## 15. PTM Scheduler (Admin)
+
+### Features
+- **Create PTM Event:** Set PTM date, slot duration (e.g., 10 minutes), buffer between slots, and teacher participation list.
+- **Slot Generation:** Auto-generate time slots for each teacher for the PTM duration.
+- **Booking Window:** Configure when parents can start booking (e.g., 3 days before PTM date).
+- **Override Booking:** Admin can manually assign or cancel a booking.
+- **Day-Of Dashboard:** Real-time view of booking status, attended/missed counts per teacher.
+
+### Technical Implementation
+- `PtmEvent` model: `schoolId`, `date`, `slotDurationMins`, `bufferMins`, `bookingOpensAt`, `status`
+- `PtmSlot` model: `ptmEventId`, `teacherId`, `startTime`, `endTime`, `isBooked`
+- On event publish: BullMQ job generates all `PtmSlot` rows per teacher × time slots
+- Admin override: `PATCH /api/v1/admin/ptm/bookings/:id` → force assign/cancel
+
+---
+
+## 16. Library Management (Admin)
+
+### Features
+- **Book Catalog:** Add books individually or via CSV import (ISBN, title, author, category, copies).
+- **Issue & Return:** Issue books to students via barcode scan or student search; record returns.
+- **Fine Collection:** Overdue fines automatically added to student's fee ledger for collection via Fees module.
+- **Digital Resources:** Upload NCERT PDFs, sample papers, question banks — tagged by class and subject.
+- **Overdue Reports:** Export list of students with overdue books for reminders.
+
+### Technical Implementation
+- `LibraryBook` model: `schoolId`, `isbn`, `title`, `author`, `category`, `totalCopies`, `availableCopies`
+- `BookIssue` model: `bookId`, `studentId`, `issuedById` (admin/librarian), `issuedAt`, `dueDate`, `returnedAt`, `fine`
+- Fine trigger: on return, `fine = max(0, daysDiff(returnedAt, dueDate)) × book.finePerDay`; creates `FeeInvoice` row
+- Digital resources: uploaded to S3 under `library/resources/{classId}/{subjectId}/` — same CDN as notes
+- Barcode input: standard keyboard-wedge barcode scanner triggers ISBN lookup on focused input field
+
+---
+
 ## 11. Technical Edge Cases & Considerations (Indian Context)
 
 1. **The "Excel Culture":** Every data grid MUST have "Export to CSV/Excel" (`xlsx` npm package). Every setup flow must allow CSV import. Admins use Excel for everything from attendance reports to fee reconciliation. If this is missing, the system will be rejected.

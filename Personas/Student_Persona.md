@@ -685,6 +685,38 @@ model ConsentRecord {
 
 ---
 
+## 12. Library
+
+### Features
+- **Browse Catalog:** Search books by title, author, or subject. See availability (copies available / total copies).
+- **My Books:** View currently borrowed books with due dates and overdue status.
+- **Digital Resources:** Access NCERT PDFs, sample papers, and question banks filtered by subject.
+- **Overdue Reminder:** Push notification 1 day before due date and on the day of.
+
+### Technical Implementation
+- **`GET /api/v1/students/library/catalog?q=&subjectId=&category=&page=`** — paginated book search
+- **`GET /api/v1/students/library/my-books`** → `[{ bookTitle, issuedAt, dueDate, isOverdue, fine }]`
+- **`GET /api/v1/students/library/resources?subjectId=&classId=`** — digital resources, same S3/CDN as notes
+- Student cannot self-issue books — issue/return done by librarian. Student view is read-only for catalog and borrowing status.
+- Overdue reminder: BullMQ scheduled job created at issue time; `expo-notifications` local notification as backup.
+
+---
+
+## 13. Report Card
+
+### Features
+- **Board-Specific Report Card:** View report card in school's board format (CBSE/ICSE/State Board) per academic session.
+- **Subject-Wise Marks:** Each subject's marks per exam type with computed final grade.
+- **Co-Scholastic Summary (CBSE):** Activity, discipline, and value grades.
+- **Download PDF:** Save for offline reference or sharing.
+
+### Technical Implementation
+- **`GET /api/v1/students/report-cards?sessionId=`** → `[{ session, subjectResults, coScholastic, reportCardUrl }]`
+- `reportCardUrl`: 1-hour pre-signed S3 URL — `expo-sharing` opens native PDF viewer.
+- Students see only their own data — `JwtAuthGuard` + student `sub` scoped to their `studentId` only.
+
+---
+
 ## 11. Technical Edge Cases & Considerations (Indian Context)
 
 1. **Shared Devices:** `SecureStore` / MMKV encrypted — tokens not accessible to other apps. Prominent sign-out on profile. Short-lived access tokens (15 min) reduce risk window.

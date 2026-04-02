@@ -312,6 +312,146 @@ Even digital manual attendance takes time. With 6-8 periods and 30+ sections, cu
 
 ---
 
+## 13. WhatsApp Integration
+
+### Problem
+Parents are more reliably reached on WhatsApp than any other channel. Push notifications go undelivered when the app isn't installed or notifications are disabled. Schools already use informal WhatsApp groups — this formalises it with accountability and compliance.
+
+### Features
+- Automated WhatsApp messages for: student absence, fee due reminders, homework posted, urgent school announcements
+- WhatsApp Business API integration (via Gupshup or Interakt — both India-focused, DLT-registered)
+- Two-way messaging: parent can reply to acknowledge receipt
+- Fallback chain: push notification → WhatsApp → SMS
+- Admin configures which event types trigger WhatsApp messages
+- TRAI-compliant pre-approved message templates
+
+### Implementation
+- Integrate Gupshup or Interakt WhatsApp Business API
+- All message templates pre-registered with TRAI DLT (mandatory in India)
+- BullMQ worker handles delivery with retry logic
+- Delivery receipts logged against `UserNotificationState`
+- Admin toggles per-event WhatsApp delivery in school settings
+
+### Key Risks
+- WhatsApp Business API has per-message costs — admin controls which events trigger it
+- Template approval takes 1–3 business days; required before launch
+- Two-way replies need a webhook handler; out-of-scope replies gracefully ignored
+
+---
+
+## 14. Board-Specific Grading & Report Cards
+
+### Problem
+CBSE, ICSE, and 30+ State Boards each have different grading systems, subject structures, exam weightage, and report card formats. A generic report card will be rejected by schools.
+
+### Features
+- Configurable grading schemes: CBSE (9-point grading scale), ICSE (percentage-based), State Board (raw marks)
+- Exam weightage configuration per board (unit test %, half-yearly %, annual %)
+- Co-scholastic area tracking (activities, discipline, values — mandatory for CBSE)
+- Board-specific PDF report card templates
+- Marks entry via spreadsheet-style grid per teacher
+- Bulk report card generation per class
+- UDISE+ data export for government compliance
+
+### Implementation
+- Admin selects school's board during setup — determines default grading config
+- `GradingScheme` model: name, board, gradeSlabs (e.g., A1 = 91–100, A2 = 81–90)
+- `ExamWeightage` model: exam type, weight percentage per session
+- `MarksEntry` model: student, subject, exam type, marks obtained, max marks
+- Report card PDF generated via Puppeteer with board-specific Handlebars template
+- CBSE-specific: co-scholastic areas stored as separate `CoscholasticRecord` rows
+
+### Key Risks
+- State Board formats vary wildly — design the template engine to be data-driven, not hardcoded
+- Report card PDF must match official format exactly — schools will not accept deviations
+- First version supports CBSE and ICSE; State Boards added per school requirement
+
+---
+
+## 15. Admission & Enrollment Management
+
+### Problem
+Every Indian school runs an annual admission cycle. Inquiry calls, form filling, document collection, and waitlist management are entirely manual — on paper or scattered spreadsheets.
+
+### Features
+- Online admission inquiry form with document upload (Aadhaar, birth certificate, previous school TC, passport photo)
+- Inquiry lead tracking: source (walk-in, referral, online), status (inquiry → applied → interview → admitted → rejected)
+- Seat capacity enforcement per class/section
+- Waitlist management with auto-notification when a seat opens
+- Fee collection at admission stage (integrated with Fees module)
+- Transfer Certificate (TC) generation PDF for outgoing students
+- Bulk enrollment of new students at start of academic session
+
+### Implementation
+- `AdmissionInquiry` model: name, parent contact, class applying for, source, status, documents[]
+- Status transitions tracked with timestamps and `adminId` who actioned each stage
+- Documents uploaded to S3 under `admissions/{inquiryId}/`
+- TC generation: Puppeteer PDF with school letterhead, student details, date of leaving, conduct remark
+- Waitlist: auto-sorted by inquiry date; on seat cancellation → auto-notify next in list via push + WhatsApp
+
+### Key Risks
+- Documents contain PII (Aadhaar numbers) — S3 access must be private, served via pre-signed URLs only
+- TC generation must match state education department's required format (configurable template)
+
+---
+
+## 16. PTM (Parent-Teacher Meeting) Scheduler
+
+### Problem
+PTMs are a regular fixture in every Indian school (3–4 per year). Currently managed via physical notices and informal calls, causing scheduling chaos and long queues on PTM day.
+
+### Features
+- Admin creates PTM event with date, and configures available time slots per teacher
+- Parents book slots online — first-come-first-served or pre-assigned
+- Teacher view: full appointment schedule for the PTM day in chronological order
+- Automated reminders: push + WhatsApp 1 day before and 1 hour before the slot
+- Post-PTM: teacher adds per-student meeting notes (visible to parent in their child's profile)
+- PTM history visible to parents for tracking follow-up actions
+
+### Implementation
+- `PtmEvent` model: date, school, status (draft/published/completed)
+- `PtmSlot` model: teacher, start time, end time, duration, capacity (usually 1), status
+- `PtmBooking` model: slot, parent, child, booked at, attended boolean
+- Booking opens at a configurable time (e.g., 3 days before PTM date)
+- Reminder jobs queued in BullMQ at booking time — cancelled on booking cancellation
+- Post-PTM notes stored as `PtmNote` (teacherId, studentId, ptmEventId, content)
+
+### Key Risks
+- Slot conflicts if a parent has multiple children with the same teacher — system must detect and warn
+- Teacher slot schedules must account for short breaks — admin configures buffer minutes between slots
+- No-show tracking: admin can mark bookings as attended/missed for records
+
+---
+
+## 17. Library Management
+
+### Problem
+Most Indian schools have a physical library. Book issue/return is tracked in paper registers — prone to loss, hard to report on, and inaccessible to parents and students.
+
+### Features
+- Book catalog with ISBN/barcode lookup and manual entry
+- Issue and return tracking per student — linked to student profile
+- Configurable loan duration per book category (e.g., 7 days for fiction, 14 days for reference)
+- Due date reminders (3 days before, 1 day before, day of due)
+- Overdue fine calculation (configurable per-day rate)
+- Digital resources section: NCERT PDFs, sample papers, question banks (upload once, access many)
+- Book availability status visible to students and parents
+- Student reading/borrowing history
+
+### Implementation
+- `LibraryBook` model: title, author, ISBN, category, total copies, available copies
+- `BookIssue` model: bookId, studentId, issuedAt, dueDate, returnedAt, fine
+- Fine computed at return time: `overdueDays * finePerDay`
+- Digital resources stored as S3 files tagged by class and subject — same CDN as notes
+- Reminders via BullMQ scheduled jobs created at issue time; cancelled on early return
+- Admin/librarian role can issue/return books via web portal; barcode scanner support via keyboard wedge input
+
+### Key Risks
+- Physical book count must stay in sync — periodic audit workflow needed
+- Fine collection should integrate with the Fees module (fine added to student's fee ledger)
+
+---
+
 ## User Roles & Access Matrix
 
 | Feature | Admin | Teacher | Parent | Student |
@@ -328,6 +468,11 @@ Even digital manual attendance takes time. With 6-8 periods and 30+ sections, cu
 | Leave Applications | Approve (teacher) | Apply/Approve (student) | Apply (child) | — |
 | Teacher Management | Full access | View own salary/attendance | — | — |
 | AI Attendance (v2) | Configure | Use | View own child | View own |
+| WhatsApp Integration | Configure | — | Receive alerts | — |
+| Board Report Cards | Configure scheme | Enter marks | View child's | View own |
+| Admission Management | Full access | — | Apply / Track | — |
+| PTM Scheduler | Create events | View schedule / Add notes | Book slot / View notes | — |
+| Library Management | Full access | Issue/Return | View child's | View / Borrow |
 
 ---
 

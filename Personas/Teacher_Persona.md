@@ -572,6 +572,51 @@ const result = await ImagePicker.launchImageLibraryAsync({
 
 ---
 
+## 11. PTM Appointment Schedule
+
+### Features
+- **PTM Day View:** Teacher sees their full appointment list for the PTM event — student name, parent name, time slot — in chronological order.
+- **Post-PTM Notes:** After each parent meeting, teacher adds a brief note per student (e.g., "Struggling with algebra, advised extra practice. Parent agreed to arrange tutor."). Visible to parent in their app.
+- **Walk-In Override:** Teacher can mark an unbooked slot as attended for walk-in parents.
+
+### Technical Implementation
+- **`GET /api/v1/teachers/ptm/:ptmEventId/schedule`** → `[{ slot, studentName, parentName, startTime, endTime, bookingId }]`
+- **`POST /api/v1/teachers/ptm/notes`** → `{ ptmEventId, studentId, content }` — creates `PtmNote` row
+- **Frontend:** `(app)/teacher/ptm/[eventId].tsx` — timeline list view; tap slot → note editor modal.
+
+---
+
+## 12. Marks Entry (Board-Specific)
+
+### Features
+- **Exam Selection:** Choose exam type (Unit Test / Half-Yearly / Annual) and subject.
+- **Marks Grid:** Spreadsheet-style grid — student name on rows, marks input column, max marks header.
+- **Board-Aware UI:** For CBSE, shows grade slab preview alongside marks. Co-scholastic areas shown as separate section.
+- **Submission Lock:** Once marks are submitted and confirmed, locked from editing (admin override required).
+
+### Technical Implementation
+- **`GET /api/v1/teachers/classes/:classId/marks?subjectId=&examType=`** → current entries with student list
+- **`POST /api/v1/teachers/marks/bulk`** → `[{ studentId, subjectId, examType, marksObtained, maxMarks }]` — Prisma `upsert` per row
+- **Frontend:** `(app)/teacher/marks/[classId].tsx` — `FlashList` rows, numeric keyboard, inline validation (can't exceed maxMarks).
+
+---
+
+## 13. Library (Issue & Return)
+
+Teachers with librarian permissions can issue and return books.
+
+### Features
+- **Issue Book:** Search student by name or scan roll number; search book by title or barcode; confirm issue.
+- **Return Book:** Look up active issues by student; mark returned.
+- **Overdue Alerts:** List of students in their class with overdue books — can nudge student directly.
+
+### Technical Implementation
+- **`POST /api/v1/library/issues`** → `{ bookId, studentId }` — decrements `LibraryBook.availableCopies`
+- **`PATCH /api/v1/library/issues/:id/return`** — sets `returnedAt`, computes fine, restores `availableCopies`
+- **Guard:** `LibrarianGuard` — only users with `librarian` sub-role or ADMIN can call issue/return endpoints.
+
+---
+
 ## 10. Technical Edge Cases & Considerations (Indian Context)
 
 1. **Low Bandwidth:** Image compression before upload is non-negotiable. Teachers on 1.5GB daily data caps will abandon the app if a 10-photo upload consumes 50MB. Always compress to < 500KB per photo on-device before uploading.

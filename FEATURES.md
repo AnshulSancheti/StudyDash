@@ -7,6 +7,11 @@
 - Notifications
 - PixelTrace (event photo discovery)
 - Student profile and academic overview
+- Admission & Enrollment Management
+- Library Management
+- PTM (Parent-Teacher Meeting) Scheduling
+- Board-Specific Grading & Report Cards
+- WhatsApp Integration
 
 ---
 
@@ -57,6 +62,18 @@
 - “This is not me” mismatch report
 - Favorite photos collection
 
+## Library (Student View)
+- Browse book catalog by title, author, subject
+- View current borrowed books and due dates
+- Digital resources section (NCERT PDFs, sample papers, study material)
+- Overdue book reminders
+- Reading history
+
+## Report Card (Student View)
+- View board-specific report card (CBSE 9-point scale / ICSE percentage / State Board)
+- Subject-wise marks breakdown
+- Historical report cards by academic session
+
 ## Profile and Settings
 - Student profile view
 - Class/section details
@@ -77,6 +94,10 @@
 - Event photo upload for PixelTrace
 - Manual photo tagging workflow
 - Flag incorrect tags for moderation
+- Enter marks in board-specific format (CBSE/ICSE/State Board)
+- View PTM appointment schedule for the day
+- Add post-PTM notes per student (visible to parent)
+- Issue and return library books for students
 
 ---
 
@@ -91,6 +112,12 @@
 - Data correction tools (attendance/identity fixes)
 - PixelTrace moderation queue
 - Storage and usage dashboard
+- Admission & Enrollment Management (inquiry tracking, online forms, waitlist, TC generation)
+- Library catalog setup and book management
+- PTM event scheduling and slot management
+- Board/grading scheme configuration (CBSE, ICSE, State Board)
+- Report card template management and bulk generation
+- WhatsApp broadcast channel configuration
 
 ---
 
@@ -100,6 +127,11 @@
 - School notifications feed
 - Absence alerts
 - Parent-teacher communication request flow
+- Online admission application and status tracking
+- PTM slot booking and appointment management
+- Receive absence/fee/homework alerts via WhatsApp
+- View child's report card (board-specific format)
+- View child's library borrowing status
 
 ---
 
@@ -130,6 +162,9 @@
 - Scheduled announcements
 - Notification delivery/open analytics
 - In-app acknowledgement for critical notices
+- WhatsApp Business API integration for automated alerts (absence, fees, homework)
+- Two-way WhatsApp messaging (parent can reply to acknowledge)
+- WhatsApp as fallback when push notification undelivered
 
 ---
 
@@ -180,6 +215,47 @@
 - Calendar integration (Google/Apple calendar export)
 - Cloud storage integration for note imports
 - SMS/email fallback for critical alerts
+- WhatsApp Business API (Gupshup/Interakt) for automated notifications
+
+---
+
+## 17) Admission & Enrollment Management
+- Online admission inquiry form with document upload
+- Inquiry lead tracking (walk-in, referral, online source)
+- Waitlist management with auto-notification on seat availability
+- Fee collection at admission stage
+- Transfer Certificate (TC) generation for outgoing students
+- Bulk student enrollment at session start
+
+---
+
+## 18) Library Management
+- Book catalog with ISBN/barcode lookup
+- Issue and return tracking per student
+- Due date reminders and overdue fine calculation
+- Digital resource section (NCERT PDFs, sample papers, question banks)
+- Library card integration with student profile
+- Book availability status visible to students/parents
+
+---
+
+## 19) PTM (Parent-Teacher Meeting) Scheduler
+- Admin creates PTM event with available time slots per teacher
+- Parents book slots online (first-come or assigned)
+- Teacher sees full appointment schedule for PTM day
+- Automated reminders (1 day and 1 hour before slot)
+- Post-PTM: teacher adds per-student notes visible to parent
+- PTM history and follow-up action tracking
+
+---
+
+## 20) Board-Specific Grading & Report Cards
+- Configurable grading schemes (CBSE 9-point, ICSE percentage, State Board marks)
+- Exam weightage configuration per board (unit test %, half-yearly %, annual %)
+- Co-scholastic area tracking (mandatory for CBSE)
+- Board-specific PDF report card templates
+- Bulk report card generation per class
+- UDISE+ data export for government compliance
 
 ---
 
