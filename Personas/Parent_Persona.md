@@ -1,3 +1,5 @@
+> **Note:** This persona was written before the MVP scope was locked. MVP features: Auth (Phone+OTP), Multi-child support, Attendance viewing, Homework/Notes (read-only), Fees payment (Razorpay), Bus tracking, Leave requests, Complaint tickets, Notifications. Features like PixelTrace, PTM booking, Library, Report cards, and WhatsApp alerts are post-MVP. See `MVP.md` for the canonical spec. The technical implementation details in this file remain useful reference.
+
 # Parent Persona: Features & Technical Implementation
 
 ## Persona Overview

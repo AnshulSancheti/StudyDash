@@ -1,3 +1,5 @@
+> **Note:** This persona was written before the MVP scope was locked. MVP features: Auth (Phone+OTP), Attendance, Homework/Notes, Timetable, Fees (view only), Bus Tracking, Notifications, Leave (view only). Features like PixelTrace, Library, Report Cards, and Search are post-MVP. See `MVP.md` for the canonical spec. The technical implementation details (schemas, API patterns, auth flows) in this file remain useful reference for implementation.
+
 # Student Persona: Features & Technical Implementation
 
 ## Persona Overview

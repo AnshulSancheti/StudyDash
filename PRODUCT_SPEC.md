@@ -2,7 +2,7 @@
 
 ## Overview
 
-StudyDash is a unified school management dashboard serving three user types: **School Administration**, **Teachers**, and **Parents/Students**. The core differentiator is an AI-powered face recognition platform (Pixel Trace) that enables event photo discovery and, once mature, automated classroom attendance.
+StudyDash is a unified school management platform for Indian schools serving five user roles: **School Administration**, **Teachers**, **Parents**, **Students**, and **Drivers**. The platform consists of a mobile app (React Native) for Teachers, Parents, Students, and Drivers, and a web admin panel (Next.js) for School Administration. The core differentiator is Pixel Trace — an AI-powered face recognition platform for event photo discovery.
 
 ---
 
@@ -10,469 +10,478 @@ StudyDash is a unified school management dashboard serving three user types: **S
 
 | Phase | Scope | Rationale |
 |-------|-------|-----------|
-| **v1 — Launch** | Bus GPS Tracking, Digital Attendance (manual), Fees Payment, Communication Channel, Timetable & Calendar | Core pain points, immediate adoption value |
-| **v1.5** | Pixel Trace (event photo matching) | Differentiator, low-stakes AI deployment to train and validate the face model |
-| **v2** | AI Attendance (class photo → auto roll call) | Only after face model is battle-tested through Pixel Trace |
-| **v3 / On Demand** | Smart Notes (smartboard capture / student photo upload) | Build only if schools actively request it |
+| **MVP** | Auth, School Onboarding, Digital Attendance, Homework & Class Notes, Timetable, Fees Payment, Communication Channel, Leave Applications, Push Notifications, GPS Bus Tracking, Expense Tracker | Core pain points, immediate adoption value |
+| **v1.5a** | Pixel Trace Light (manual photo tagging) | Differentiator, builds photo library and consent base |
+| **v1.5b** | Pixel Trace AI (face recognition matching) | Low-stakes AI deployment to train and validate face model |
+| **v1.5c** | WhatsApp Integration | Notification fallback chain for reliable parent communication |
+| **v2a** | School Email Provisioning | Google Workspace / Microsoft 365 student email management |
+| **v2b** | PTM Scheduler | Parent-teacher meeting slot booking |
+| **v2c** | Library Management | Book catalog, issue/return tracking, fine integration |
+| **v2d** | AI Attendance (class photo → auto roll call) | Only after face model is battle-tested through Pixel Trace |
+| **v2e** | Board-Specific Report Cards | CBSE/ICSE/State Board format report card generation |
+| **v2f** | Admission & Enrollment Management | Online inquiry → application → enrollment flow |
+| **v3** | Advanced analytics, SIS integrations, multi-school chain dashboards | Build on demand |
 
 ---
 
-## 1. GPS Bus Tracking
+## Tech Stack
 
-### Problem
-Parents call the school office dozens of times daily asking about bus location. Students wait at stops without knowing if the bus is delayed.
-
-### Features
-- Real-time GPS location of each school bus on a map
-- Estimated arrival time at each stop
-- Push notifications to parents: "Bus is 5 minutes away from your stop"
-- Notification when child boards/alights (if paired with RFID or manual check-in)
-- Route history and delay logs for school admin
-
-### Implementation
-- GPS hardware unit installed in each bus (OBD-II tracker or dedicated device)
-- Driver app (minimal UI) as fallback if hardware isn't feasible
-- Backend ingests location pings every 10-15 seconds
-- ETA calculated using route geometry + real-time position
-- Parent-facing map view in the dashboard/app
-
-### Key Risks
-- GPS signal loss in underground/covered areas — handle gracefully with "last known location" + timestamp
-- Driver phone battery/data — hardware tracker is more reliable than a driver app
-- Bus route changes (field trips, diversions) — admin must be able to update routes easily
+| Layer | Technology |
+|-------|-----------|
+| Backend | Node.js + TypeScript + Express |
+| ORM / Database | Prisma + PostgreSQL |
+| Mobile App | React Native (Expo) |
+| Web Admin Panel | Next.js + React |
+| File Storage | AWS S3 (presigned URLs) |
+| Job Queue | BullMQ + Redis |
+| Payments | Razorpay |
+| SMS / OTP | MSG91 or Twilio |
+| Push Notifications | Firebase Cloud Messaging (FCM) + APNs |
+| PDF Generation | Puppeteer |
 
 ---
 
-## 2. Attendance (Student)
+## Platforms
 
-### Problem
-Manual roll call consumes 5-10 minutes per period. Paper registers are error-prone and hard to digitize for reporting.
-
-### Features
-- Teacher marks attendance digitally per period
-- Instant parent notification on student absence
-- Daily/weekly/monthly attendance reports for admin
-- Minimum attendance threshold alerts (e.g., below 75%)
-- Late arrival tracking
-
-### Implementation (v1 — Manual Digital)
-- Teacher opens class roster in app, taps present/absent per student
-- Default all students to "present" — teacher only marks absentees (faster flow)
-- Data syncs to central dashboard in real-time
-- Automated SMS/push notification to parent on absence
-
-### Implementation (v2 — AI-Powered)
-- Teacher takes a single photo of the classroom
-- AI model identifies visible students using face recognition (trained via Pixel Trace data)
-- System auto-marks identified students as present, generates absentee list
-- Teacher verbally verifies absentee list before confirming (mandatory verification step)
-- See Section 8 (Pixel Trace) for model details and privacy considerations
-
-### Key Risks (AI Attendance)
-- False negatives (marking present student as absent) trigger parent panic — verification step is non-negotiable
-- Classroom conditions are hard for CV: occlusion, similar uniforms, poor lighting, side angles
-- Must be framed as "smart attendance assist" not "facial recognition surveillance"
-- Ship only after Pixel Trace model achieves high reliability in real school conditions
+| Role | Platform |
+|------|----------|
+| School Admin | Web panel (Next.js) |
+| Teacher | Mobile app (React Native) |
+| Parent | Mobile app (React Native) |
+| Student | Mobile app (React Native) |
+| Driver | Mobile app (React Native) — driver mode |
 
 ---
 
-## 3. Fees Payment
+## Authentication
 
-### Problem
-Fee collection is manual, tracking defaulters is tedious, and parents want digital payment options.
+### Parents, Students & Drivers — Phone + OTP
+- Login with phone number → receive SMS OTP → verify → JWT issued
+- Access token: 15 min expiry
+- Refresh token: 30 days, stored hashed
 
-### Features
-- Online fee payment (UPI, net banking, cards)
-- Fee structure setup by admin (tuition, transport, lab, etc.)
-- Installment plans and partial payment support
-- Automated reminders for upcoming/overdue fees
-- Receipt generation (PDF)
-- Defaulter reports for admin
-- Fee concession/scholarship tracking
+### Teachers — Email + Password
+- Login with email + password on mobile app
+- Password reset via email link
+- Access token: 15 min expiry
+- Refresh token: 30 days
 
-### Implementation
-- Integrate a payment gateway (Razorpay/Cashfree — both have education-sector pricing)
-- Admin dashboard for fee structure configuration per class/section
-- Parent view: outstanding balance, payment history, pay now button
-- Webhook-based confirmation — update ledger on successful payment
-- End-of-year fee reports exportable as CSV/Excel
-
-### Key Risks
-- Payment failures and reconciliation — need robust retry and manual override
-- Refund handling must be clear and auditable
-- PCI-DSS compliance handled by the payment gateway, but data storage must follow best practices
+### Admin — Email + Password
+- Login with email + password on web panel
+- Access token: 15 min expiry
+- Refresh token: 7 days (shorter for security)
+- Password reset via email link
 
 ---
 
-## 4. Communication Channel
+## Multi-Tenancy
 
-### Problem
-Teacher-parent communication happens over unstructured WhatsApp groups — no accountability, no records, important messages get buried.
-
-### Features
-
-**Teacher → Parent (Complaints/Updates)**
-- Teacher can send a direct message to a specific parent about their child
-- Categorized messages: academic concern, behavioral, appreciation, general update
-- Read receipts so teacher knows parent has seen the message
-- Broadcast messages to entire class (e.g., "bring art supplies tomorrow")
-
-**Parent → School (Issue Raising)**
-- Structured complaint/request form (category, description, attachments)
-- Ticket-style tracking: submitted → acknowledged → resolved
-- Escalation path: teacher → coordinator → principal
-- Resolution history visible to parent
-
-### Implementation
-- In-app messaging system (not email/SMS dependent, but SMS fallback for critical alerts)
-- Push notifications for new messages
-- Admin panel to view all open issues, response times, resolution rates
-- Message templates for common communications (fee reminder, PTM invite, etc.)
-
-### Key Risks
-- Teachers feel surveilled if admin can read all messages — define clear visibility rules
-- Parents may overuse the complaint system — add rate limiting or categorization to prevent noise
-- Must NOT become another WhatsApp — keep it structured and purposeful
+- All data scoped by `schoolId`
+- Every API query filters on `schoolId` extracted from JWT
+- S3 paths prefixed: `{schoolId}/{feature}/{entityId}/{filename}`
 
 ---
 
-## 5. Daily Timetable
+## MVP Features
 
-### Features
-- Class-wise timetable visible to students, parents, and teachers
-- Teacher-wise timetable (their schedule across classes)
-- Period substitution reflected in real-time (linked to substitute teacher module)
-- Push notification if timetable changes mid-day
+### 1. School Onboarding (Admin Web Panel)
 
-### Implementation
-- Admin configures master timetable at start of term
-- Substitution engine: when a teacher marks leave, system suggests available substitutes and updates timetable on confirmation
-- Calendar view and list view options
+**Problem:** Setting up each school manually doesn't scale. Schools need self-service onboarding.
 
----
+**Setup Wizard:**
+- Step 1: School profile (name, address, board affiliation, logo)
+- Step 2: Academic year and terms
+- Step 3: Classes and sections (e.g., Class 5 → Section A, B, C)
+- Step 4: Subjects per class
+- Step 5: Fee heads (Tuition, Transport, Lab, etc.) with amounts and installment due dates
+- Step 6: Bus routes and stops
 
-## 6. Homework & Class Notes
+**CSV Bulk Import:**
+- Students CSV: name, class, section, parent name, parent phone, address
+- Teachers CSV: name, email, department, assigned classes/subjects
+- Drivers CSV: name, phone, assigned route
+- Validation with row-level error reporting (which rows failed, why)
+- Auto-generates parent accounts linked by phone number
+- Auto-generates student/teacher/driver accounts
 
-### Features
-- Teacher posts homework per subject per class with due date
-- Homework visible to both student and parent
-- Optional: student marks homework as completed (self-reported)
-- Class notes attached to each period (photo or file upload)
-
-### Implementation (Homework)
-- Simple form: subject, description, due date, optional file attachment
-- Push notification to parents when new homework is posted
-
-### Implementation (Notes — v3, build only on demand)
-- If school has smartboards: integrate with smartboard software's export/save function to auto-upload session files
-- If no smartboard: designated student photographs notes after class, uploads via app
-- Notes tagged to subject + date + class for easy retrieval
-
-### Key Risks (Notes)
-- Notes feature depends on human discipline (student uploading) — unreliable without incentive structure
-- Smartboard integration varies wildly by vendor — scope this per school
-- Deprioritize unless schools explicitly request it
+**Key Rules:**
+- Duplicate phone number detection (same parent with multiple children → link, don't duplicate)
+- Re-upload CSV overwrites only new/changed rows (upsert by phone number or employee ID)
 
 ---
 
-## 7. Academic Records (Marks & Reports)
+### 2. Digital Attendance
 
-### Features
-- Exam-wise marks entry by teacher
-- Auto-calculated totals, percentages, grades (configurable grading system)
-- Report card generation (PDF, printable)
-- Historical performance trends visible to parents
-- Class-wide analytics for teachers (average, distribution, toppers)
+**Problem:** Manual roll call consumes 5-10 minutes per period. Paper registers are error-prone and hard to digitize.
 
-### Implementation
-- Admin defines exam schedule and weightage (unit test 20%, mid-term 30%, final 50%, etc.)
-- Teacher enters marks via simple spreadsheet-style grid
-- System computes derived metrics
-- Parent view: subject-wise breakdown, rank (if school policy allows), trend graph
+**Teacher (Mobile):**
+- Select class/section → see student list
+- Mark each student: Present, Absent, Late
+- Submit attendance (one submission per class per day)
+- Edit window: can modify within same day until midnight
+
+**Student (Mobile):**
+- View today's attendance status
+- Monthly calendar view (color-coded: green=present, red=absent, yellow=late, blue=on leave)
+- Attendance percentage summary
+
+**Parent (Mobile):**
+- Same view as student, per child (multi-child switcher)
+- Receives push notification on child marked absent
+
+**Admin (Web):**
+- Attendance compliance report: which teachers haven't marked attendance today
+- Class-wise attendance summary
+- Can override/correct attendance records
 
 ---
 
-## 8. Pixel Trace (Event Photo Discovery) — USP
+### 3. Homework & Class Notes
 
-### Problem
-Schools photograph students at events (sports day, annual day, field trips) but students/parents never receive these photos. Thousands of photos sit unused in school archives.
+**Problem:** Homework communication is unreliable (verbal, WhatsApp). Notes get lost.
 
-### Features
-- Parent/student searches by name → gets all event photos containing that student
-- Browse by event (Sports Day 2026, Annual Function, etc.)
-- Download individual photos or full event albums
-- Strictly **opt-in**: requires explicit parent consent before student's face is enrolled
-- Consent can be revoked at any time — student's face data is deleted on revocation
+**Teacher (Mobile):**
+- Create assignment: title, description, due date, class/section, subject
+- Attach files (PDF, images, docs) via S3 presigned upload
+- View completion stats (X of Y students marked complete)
+- Upload class notes: title, file, class/section, subject
 
-### Implementation
-- **Photo Storage**: School uploads event photos to a designated Google Drive folder (organized by event → date)
-- **Face Enrollment**: Student's ID card photo is used as the base reference image. System extracts face embedding and stores it (not the raw biometric — only the mathematical vector)
-- **Matching Pipeline**:
-  1. On photo upload, system runs face detection on each image
-  2. Detected faces are converted to embeddings
-  3. Embeddings are compared against enrolled student database
-  4. Matches above confidence threshold are tagged
-  5. Low-confidence matches are flagged for manual review (not auto-tagged)
-- **Access**: Parent/student logs in → searches by name → sees matched photos grouped by event
-- **Re-enrollment**: ID photos should be refreshed annually (or when student appearance changes significantly) to maintain accuracy
+**Student (Mobile):**
+- View assignments for their class, sorted by due date
+- Mark assignment as complete (toggle)
+- View and download class notes
+- Bookmark notes for quick access
 
-### Privacy & Compliance
-- Opt-in only — parent signs digital consent form before enrollment
+**Parent (Mobile):**
+- Read-only view of child's assignments (title, description, due date, completion status)
+- Read-only view of class notes
+- Push notification when new assignment is posted
+
+---
+
+### 4. Timetable
+
+**Problem:** Students/parents don't have easy access to class schedules.
+
+**Admin (Web):**
+- Configure timetable per class/section: periods, subjects, teachers, time slots
+- Set period duration, break times, lunch
+
+**Teacher (Mobile):**
+- View their teaching schedule across all classes
+- Today view + weekly view
+
+**Student (Mobile):**
+- View class timetable: today view + weekly view
+
+**Parent (Mobile):**
+- View child's timetable (read-only)
+
+---
+
+### 5. Fees Payment
+
+**Problem:** Fee collection is manual, tracking defaulters is tedious, parents want digital payment options.
+
+**Admin (Web):**
+- Create fee structures per class (fee heads + amounts + due dates)
+- Generate invoices per student (auto or manual)
+- Record offline payments (cash, cheque, bank transfer) with reference number
+- View payment status per student, per class
+- Fee defaulter report (overdue > configurable days)
+- Download collection reports (CSV/PDF)
+
+**Parent (Mobile):**
+- View outstanding fees per child (itemized by fee head)
+- Pay online via Razorpay (full or partial payment)
+- View payment history and download receipts (PDF)
+- Push notification for upcoming due dates and overdue reminders
+
+**Payment Flow:**
+- Parent initiates payment → Razorpay checkout → webhook confirms success/failure
+- Idempotency key per transaction (Razorpay order ID) — prevents duplicate processing
+- Partial payments: track amount paid per fee head, update invoice status (PENDING → PARTIAL → PAID)
+- Receipt auto-generated as PDF on successful payment (BullMQ job)
+- Reconciliation: daily batch job compares Razorpay settlements with local records, flags mismatches
+
+**Fee States:** PENDING → PARTIAL → PAID → OVERDUE (auto-set by daily cron if past due date and not fully paid)
+
+---
+
+### 6. Communication Channel
+
+**Problem:** Teacher-parent communication happens over unstructured WhatsApp groups — no accountability, no records.
+
+**Teacher (Mobile):**
+- Send class-wide announcements (text + optional attachment)
+- View and respond to parent messages about their class students
+
+**Parent (Mobile):**
+- View class announcements from teacher
+- Submit complaint/query to school (ticket-based)
+- Track ticket status (Open → In Progress → Resolved)
+- View message history
+
+**Admin (Web):**
+- Send school-wide broadcasts (all parents, all teachers, or specific classes)
+- View and manage complaint tickets (assign, respond, resolve)
+- Ticket dashboard with status filters
+
+**Message Types:**
+- Announcement: one-to-many, no reply expected
+- Ticket: parent → admin, tracked with status, supports back-and-forth thread
+
+---
+
+### 7. Leave Applications
+
+**Problem:** Leave requests are informal (phone calls, notes) with no tracking.
+
+**Parent (Mobile):**
+- Submit leave request for child: date range, reason, type (Sick, Personal, Family, Other)
+- View leave request history and status
+- Push notification on approval/rejection
+
+**Teacher (Mobile):**
+- View pending leave requests for their classes
+- Approve or reject with optional remarks
+- View leave history per student
+
+**Integration with Attendance:**
+- Approved leave → auto-upserts AttendanceRecord as ON_LEAVE for each date in range
+- Conflict check: if attendance already marked PRESENT for a leave date, flag for teacher review instead of auto-overwrite
+
+**Leave States:** PENDING → APPROVED | REJECTED
+
+---
+
+### 8. Push Notifications
+
+**Triggers:**
+
+| Event | Recipients |
+|-------|-----------|
+| Student marked absent | Parent of that student |
+| New assignment posted | Parents + students of that class |
+| Fee due in 7 days | Parent |
+| Fee overdue | Parent |
+| Payment successful | Parent |
+| Leave request status change | Parent |
+| New announcement | Target audience (class/school) |
+| Bus started route | Parents of students on that route |
+| Bus near stop | Parent of students at that stop |
+
+**Implementation:**
+- FCM for Android, APNs for iOS (via Firebase)
+- Device tokens stored per user (support multiple devices)
+- BullMQ job per notification event → fans out to all recipient device tokens
+- In-app notification history (stored in DB, paginated)
+- Notification states: CREATED → DELIVERED → READ
+
+---
+
+### 9. GPS Bus Tracking
+
+**Problem:** Parents call the school office dozens of times daily asking about bus location.
+
+**Driver (Mobile):**
+- Start/end route button
+- App sends GPS coordinates every 10 seconds while route is active
+- Background location tracking (React Native background geolocation)
+- Shows current route and upcoming stops
+
+**Parent (Mobile):**
+- Map view showing bus location (Google Maps SDK)
+- ETA to child's stop (distance ÷ average speed)
+- Push notification: "Bus started route" and "Bus approaching your stop" (within 500m radius)
+- Last known location with timestamp if GPS signal lost
+
+**Admin (Web):**
+- Define routes: ordered list of stops with names and coordinates
+- Assign drivers and buses to routes
+- Assign students to stops
+- View all active buses on a map (live dashboard)
+- Route history log
+
+**Data Model:**
+- Route → ordered Stops → assigned Students
+- LiveLocation: { driverId, routeId, lat, lng, speed, timestamp } — overwritten per ping, history kept for today only
+- Geofence per stop: 500m radius triggers "approaching" notification
+
+**Key Risks:**
+- Depends on driver actually running the app (human reliability)
+- Phone battery drain during long routes
+- GPS accuracy varies (±10-50m in cities, worse in rural areas)
+- If driver's phone dies or loses signal, location goes stale — show "last known location" + timestamp
+
+---
+
+### 10. Expense Tracker (Admin Web Panel)
+
+**Problem:** Schools have no visibility into where operational money goes.
+
+**Features:**
+- Log expense: amount, category, date, description, optional receipt upload (image/PDF to S3)
+- Predefined categories: Salaries, Maintenance, Utilities, Events, Supplies, Transport, Other
+- Admin can add custom categories
+- Expense list view: table with filters (date range, category), sortable by date/amount
+- Monthly summary: total spend, category-wise breakdown (pie chart)
+- Year-over-year comparison: this month vs. last month total
+
+**What it is NOT:**
+- No budgeting or forecasting
+- No approval workflows — admin logs it, done
+- No integration with fee income (future analytics feature)
+- No double-entry bookkeeping
+
+---
+
+## Post-MVP Features
+
+### Pixel Trace (Event Photo Discovery) — USP
+
+**Problem:** Schools photograph students at events but parents never receive these photos. Thousands sit unused.
+
+**Phase 1 — Pixel Trace Light (v1.5a):**
+- School uploads event photos to S3 (organized by event)
+- Teachers manually tag students in photos
+- Parents/students view photos their child is tagged in (consent-gated)
+- Consent gate: parent opts in/out, data deleted on revocation
+
+**Phase 2 — Pixel Trace AI (v1.5b):**
+- Face embeddings generated from student ID photos
+- Automatic matching of event photos to students
+- Confidence threshold for auto-tagging; low-confidence matches go to moderation queue
+- Teacher/admin reviews and confirms low-confidence matches
+- Model improves over time with feedback
+
+**Privacy & Compliance:**
+- Opt-in only — parent signs digital consent form
 - Face embeddings (vectors) stored, not raw biometric templates
-- Comply with DPDP Act (India) — data minimization, purpose limitation, right to erasure
-- If targeting international markets: COPPA (US), GDPR (EU) considerations for minors' data
-- Clear privacy policy explaining what data is collected, how it's used, and how to opt out
+- DPDP Act (India) compliance — data minimization, purpose limitation, right to erasure
 - All face data deleted if student leaves school or parent revokes consent
 
-### Key Risks
-- ID card photos vs. real-world conditions: lighting, angles, aging, accessories — accuracy will vary
-- "School uses facial recognition on children" headlines — proactive PR and transparent communication with parents is critical
-- Google Drive API rate limits on large photo batches — implement queued processing
-- Storage costs scale with number of events and photos — monitor and set upload guidelines
-
-### Strategic Importance
-Pixel Trace is not just a feature — it is the **foundation of StudyDash's AI moat**. The face model trained and validated here directly powers the v2 AI Attendance system. Every event processed improves the model's accuracy in real school conditions.
+**Strategic Importance:** Pixel Trace is the foundation of StudyDash's AI moat. The face model trained here directly powers the future AI Attendance system.
 
 ---
 
-## 9. Yearly Calendar
+### WhatsApp Integration (v1.5c)
 
-### Features
-- School-wide calendar showing holidays, exams, PTM dates, events
-- Filterable by category (holiday, exam, event, deadline)
-- Sync with device calendar (iCal export)
-- Push notifications for upcoming events (configurable: 1 day before, 1 week before)
-
-### Implementation
-- Admin manages calendar via dashboard
-- Recurring events support (e.g., weekly assembly every Monday)
-- Calendar integrates with exam module (Section 7) and timetable (Section 5)
-
----
-
-## 10. Leave Applications
-
-### Features
-
-**Student Leave**
-- Parent submits leave request (date range, reason, category: sick/personal/family)
-- Class teacher approves/rejects with optional comment
-- Approved leave auto-updates attendance records (marked as "on leave" not "absent")
-
-**Teacher Leave**
-- Teacher submits leave request to admin/coordinator
-- Leave balance tracking (casual, sick, earned leave)
-- On approval, triggers substitute teacher assignment flow (linked to timetable)
-
-### Implementation
-- Approval workflow: submit → pending → approved/rejected
-- Push notifications at each stage
-- Leave history and balance visible to applicant
-
----
-
-## 11. Teacher Management (Admin-Only)
-
-### Features
-- Teacher attendance tracking (separate from student attendance)
-- Salary management: structure, payslips, payment history
-- Substitute teacher pool and assignment
-- Teacher performance data (attendance rate, communication responsiveness — optional)
-
-### Implementation
-- Teacher checks in via app (or biometric integration if school has existing hardware)
-- Salary module: admin sets structure, system generates monthly payslips
-- Substitute flow: teacher marks leave → system shows available teachers for that subject/period → admin confirms → timetable updates automatically
-
----
-
-## 12. AI Attendance (v2 — Future)
-
-### Problem
-Even digital manual attendance takes time. With 6-8 periods and 30+ sections, cumulative time lost is significant.
-
-### Features
-- Teacher takes one photo of the classroom
-- System identifies students and auto-marks attendance
-- Absentee list generated for teacher verification
-- Teacher confirms or corrects before submission
-
-### Implementation
-- Uses the same face recognition model as Pixel Trace, further trained on classroom conditions
-- Handles partial visibility (students behind others) by marking as "unverified" rather than "absent"
-- Requires minimum photo quality checks before processing (blur detection, lighting check)
-- Runs on server-side — not on teacher's phone (avoids device capability issues)
-- Model improves over time with correction feedback (teacher fixes → retraining data)
-
-### Prerequisites Before Launch
-- Pixel Trace must be live for at least 2-3 months with measurable accuracy metrics
-- Face model must achieve >95% accuracy on real classroom photos in pilot schools
-- Privacy impact assessment completed
-- Parent communication and consent updated to cover attendance use case
-
----
-
-## 13. WhatsApp Integration
-
-### Problem
-Parents are more reliably reached on WhatsApp than any other channel. Push notifications go undelivered when the app isn't installed or notifications are disabled. Schools already use informal WhatsApp groups — this formalises it with accountability and compliance.
-
-### Features
-- Automated WhatsApp messages for: student absence, fee due reminders, homework posted, urgent school announcements
-- WhatsApp Business API integration (via Gupshup or Interakt — both India-focused, DLT-registered)
-- Two-way messaging: parent can reply to acknowledge receipt
+- Automated WhatsApp messages for: absence, fee reminders, homework, urgent announcements
+- WhatsApp Business API via Gupshup or Interakt (India-focused, DLT-registered)
 - Fallback chain: push notification → WhatsApp → SMS
-- Admin configures which event types trigger WhatsApp messages
 - TRAI-compliant pre-approved message templates
-
-### Implementation
-- Integrate Gupshup or Interakt WhatsApp Business API
-- All message templates pre-registered with TRAI DLT (mandatory in India)
-- BullMQ worker handles delivery with retry logic
-- Delivery receipts logged against `UserNotificationState`
-- Admin toggles per-event WhatsApp delivery in school settings
-
-### Key Risks
-- WhatsApp Business API has per-message costs — admin controls which events trigger it
-- Template approval takes 1–3 business days; required before launch
-- Two-way replies need a webhook handler; out-of-scope replies gracefully ignored
+- Admin configures which events trigger WhatsApp messages
 
 ---
 
-## 14. Board-Specific Grading & Report Cards
+### School Email Provisioning (v2a)
 
-### Problem
-CBSE, ICSE, and 30+ State Boards each have different grading systems, subject structures, exam weightage, and report card formats. A generic report card will be rejected by schools.
-
-### Features
-- Configurable grading schemes: CBSE (9-point grading scale), ICSE (percentage-based), State Board (raw marks)
-- Exam weightage configuration per board (unit test %, half-yearly %, annual %)
-- Co-scholastic area tracking (activities, discipline, values — mandatory for CBSE)
-- Board-specific PDF report card templates
-- Marks entry via spreadsheet-style grid per teacher
-- Bulk report card generation per class
-- UDISE+ data export for government compliance
-
-### Implementation
-- Admin selects school's board during setup — determines default grading config
-- `GradingScheme` model: name, board, gradeSlabs (e.g., A1 = 91–100, A2 = 81–90)
-- `ExamWeightage` model: exam type, weight percentage per session
-- `MarksEntry` model: student, subject, exam type, marks obtained, max marks
-- Report card PDF generated via Puppeteer with board-specific Handlebars template
-- CBSE-specific: co-scholastic areas stored as separate `CoscholasticRecord` rows
-
-### Key Risks
-- State Board formats vary wildly — design the template engine to be data-driven, not hardcoded
-- Report card PDF must match official format exactly — schools will not accept deviations
-- First version supports CBSE and ICSE; State Boards added per school requirement
+- School-issued emails (student@schoolname.edu.in)
+- Google Workspace for Education / Microsoft 365 integration
+- Managed through StudyDash admin panel
+- Enables student benefits (Google Workspace, Microsoft 365, student discounts)
 
 ---
 
-## 15. Admission & Enrollment Management
+### PTM Scheduler (v2b)
 
-### Problem
-Every Indian school runs an annual admission cycle. Inquiry calls, form filling, document collection, and waitlist management are entirely manual — on paper or scattered spreadsheets.
-
-### Features
-- Online admission inquiry form with document upload (Aadhaar, birth certificate, previous school TC, passport photo)
-- Inquiry lead tracking: source (walk-in, referral, online), status (inquiry → applied → interview → admitted → rejected)
-- Seat capacity enforcement per class/section
-- Waitlist management with auto-notification when a seat opens
-- Fee collection at admission stage (integrated with Fees module)
-- Transfer Certificate (TC) generation PDF for outgoing students
-- Bulk enrollment of new students at start of academic session
-
-### Implementation
-- `AdmissionInquiry` model: name, parent contact, class applying for, source, status, documents[]
-- Status transitions tracked with timestamps and `adminId` who actioned each stage
-- Documents uploaded to S3 under `admissions/{inquiryId}/`
-- TC generation: Puppeteer PDF with school letterhead, student details, date of leaving, conduct remark
-- Waitlist: auto-sorted by inquiry date; on seat cancellation → auto-notify next in list via push + WhatsApp
-
-### Key Risks
-- Documents contain PII (Aadhaar numbers) — S3 access must be private, served via pre-signed URLs only
-- TC generation must match state education department's required format (configurable template)
+- Admin creates PTM events with time slots per teacher
+- Parents book slots online (first-come-first-served)
+- Teacher sees full appointment schedule
+- Automated reminders (1 day and 1 hour before)
+- Post-PTM teacher notes per student, visible to parent
 
 ---
 
-## 16. PTM (Parent-Teacher Meeting) Scheduler
+### Library Management (v2c)
 
-### Problem
-PTMs are a regular fixture in every Indian school (3–4 per year). Currently managed via physical notices and informal calls, causing scheduling chaos and long queues on PTM day.
-
-### Features
-- Admin creates PTM event with date, and configures available time slots per teacher
-- Parents book slots online — first-come-first-served or pre-assigned
-- Teacher view: full appointment schedule for the PTM day in chronological order
-- Automated reminders: push + WhatsApp 1 day before and 1 hour before the slot
-- Post-PTM: teacher adds per-student meeting notes (visible to parent in their child's profile)
-- PTM history visible to parents for tracking follow-up actions
-
-### Implementation
-- `PtmEvent` model: date, school, status (draft/published/completed)
-- `PtmSlot` model: teacher, start time, end time, duration, capacity (usually 1), status
-- `PtmBooking` model: slot, parent, child, booked at, attended boolean
-- Booking opens at a configurable time (e.g., 3 days before PTM date)
-- Reminder jobs queued in BullMQ at booking time — cancelled on booking cancellation
-- Post-PTM notes stored as `PtmNote` (teacherId, studentId, ptmEventId, content)
-
-### Key Risks
-- Slot conflicts if a parent has multiple children with the same teacher — system must detect and warn
-- Teacher slot schedules must account for short breaks — admin configures buffer minutes between slots
-- No-show tracking: admin can mark bookings as attended/missed for records
+- Book catalog with ISBN/barcode lookup
+- Issue/return tracking per student
+- Due date reminders and overdue fine calculation
+- Digital resources section (NCERT PDFs, sample papers)
+- Book availability visible to students/parents
 
 ---
 
-## 17. Library Management
+### AI Attendance (v2d)
 
-### Problem
-Most Indian schools have a physical library. Book issue/return is tracked in paper registers — prone to loss, hard to report on, and inaccessible to parents and students.
-
-### Features
-- Book catalog with ISBN/barcode lookup and manual entry
-- Issue and return tracking per student — linked to student profile
-- Configurable loan duration per book category (e.g., 7 days for fiction, 14 days for reference)
-- Due date reminders (3 days before, 1 day before, day of due)
-- Overdue fine calculation (configurable per-day rate)
-- Digital resources section: NCERT PDFs, sample papers, question banks (upload once, access many)
-- Book availability status visible to students and parents
-- Student reading/borrowing history
-
-### Implementation
-- `LibraryBook` model: title, author, ISBN, category, total copies, available copies
-- `BookIssue` model: bookId, studentId, issuedAt, dueDate, returnedAt, fine
-- Fine computed at return time: `overdueDays * finePerDay`
-- Digital resources stored as S3 files tagged by class and subject — same CDN as notes
-- Reminders via BullMQ scheduled jobs created at issue time; cancelled on early return
-- Admin/librarian role can issue/return books via web portal; barcode scanner support via keyboard wedge input
-
-### Key Risks
-- Physical book count must stay in sync — periodic audit workflow needed
-- Fine collection should integrate with the Fees module (fine added to student's fee ledger)
+- Teacher takes one classroom photo → system auto-marks attendance
+- Uses Pixel Trace face model, further trained on classroom conditions
+- Teacher verification mandatory before submission
+- Prerequisites: Pixel Trace live 2-3 months, >95% accuracy on real classroom photos
 
 ---
 
-## User Roles & Access Matrix
+### Board-Specific Report Cards (v2e)
 
-| Feature | Admin | Teacher | Parent | Student |
-|---------|-------|---------|--------|---------|
-| Bus GPS Tracking | Configure routes | — | Track bus | Track bus |
-| Student Attendance | View reports | Mark/Edit | View own child | View own |
-| Fees Payment | Configure & track | — | Pay & view | View |
-| Communication | Monitor all | Send/Receive | Send/Receive | View |
-| Timetable | Configure | View own | View child's | View own |
-| Homework & Notes | — | Post | View | View |
-| Marks & Reports | Configure exams | Enter marks | View child's | View own |
-| Pixel Trace | Upload photos | — | View/Download (opt-in) | View/Download |
-| Calendar | Manage | View | View | View |
-| Leave Applications | Approve (teacher) | Apply/Approve (student) | Apply (child) | — |
-| Teacher Management | Full access | View own salary/attendance | — | — |
-| AI Attendance (v2) | Configure | Use | View own child | View own |
-| WhatsApp Integration | Configure | — | Receive alerts | — |
-| Board Report Cards | Configure scheme | Enter marks | View child's | View own |
-| Admission Management | Full access | — | Apply / Track | — |
-| PTM Scheduler | Create events | View schedule / Add notes | Book slot / View notes | — |
-| Library Management | Full access | Issue/Return | View child's | View / Borrow |
+- Configurable grading: CBSE (9-point), ICSE (percentage), State Board (marks)
+- Exam weightage configuration per board
+- Co-scholastic area tracking (CBSE mandatory)
+- Board-specific PDF report card templates via Puppeteer
+- UDISE+ data export
 
 ---
 
+### Admission & Enrollment (v2f)
+
+- Online admission inquiry with document upload
+- Lead tracking: inquiry → applied → interview → admitted → rejected
+- Waitlist management with auto-notification
+- TC generation for outgoing students
+
+---
+
+## User Roles & Access Matrix (MVP)
+
+| Feature | Admin | Teacher | Parent | Student | Driver |
+|---------|-------|---------|--------|---------|--------|
+| School Onboarding | Full access | — | — | — | — |
+| Attendance | View reports, override | Mark/Edit | View own child | View own | — |
+| Homework & Notes | — | Create/Upload | View (read-only) | View/Complete | — |
+| Timetable | Configure | View own | View child's | View own | — |
+| Fees Payment | Configure, track, record offline | — | Pay & view | View | — |
+| Communication | Manage tickets, broadcast | Announce, respond | View, submit tickets | View | — |
+| Leave Applications | — | Approve/Reject | Apply for child | — | — |
+| Notifications | Configure triggers | Receive | Receive | Receive | Receive |
+| GPS Bus Tracking | Configure routes, live dashboard | — | Track bus | Track bus | Stream location |
+| Expense Tracker | Full access | — | — | — | — |
+
+---
+
+## API Design
+
+- RESTful API with `/api/v1/` prefix
+- Role-based route prefixes: `/api/v1/admin/`, `/api/v1/teachers/`, `/api/v1/parents/`, `/api/v1/students/`, `/api/v1/drivers/`
+- Standard error format: `{ error: string, code: string, details?: object }`
+- Pagination: cursor-based for lists
+- Rate limiting: 100 requests/min per user, 5 OTP requests/hour per phone number
+
+---
+
+## Security
+
+- All API calls over HTTPS (TLS 1.2+)
+- JWT signed with RS256
+- Passwords hashed with bcrypt (12 rounds)
+- OTP: 6-digit, expires in 5 minutes, max 5 attempts
+- Razorpay webhook signature verification on every callback
+- Input validation on all endpoints (express-validator)
+- SQL injection prevented by Prisma parameterized queries
+- File upload: MIME type validation (not just extension)
+- Max file size: 25MB per upload
+
+---
+
+## Background Jobs (BullMQ)
+
+| Queue | Purpose |
+|-------|---------|
+| notifications | Fan-out push notifications to device tokens |
+| pdf-generation | Fee receipts, report cards |
+| csv-processing | Bulk import validation and account creation |
+| thumbnail-generation | Note/photo thumbnails |
+
+- Retry policy: 3 retries with exponential backoff (1s, 4s, 16s)
+- Failed jobs logged to dead letter queue
+- Job timeout: 60 seconds (5 minutes for CSV processing)

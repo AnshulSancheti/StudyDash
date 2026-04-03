@@ -1,3 +1,5 @@
+> **Note:** This persona was written before the MVP scope was locked. MVP features: Auth (Email+Password), Attendance marking, Homework/Notes creation, Timetable view, Leave approvals, Class announcements, Notifications. Features like PixelTrace tagging, PTM, Library, Marks entry, and Board report cards are post-MVP. See `MVP.md` for the canonical spec. The technical implementation details in this file remain useful reference.
+
 # Teacher Persona: Features & Technical Implementation
 
 ## Persona Overview

@@ -4,47 +4,77 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-StudyDash is a unified school management platform for Indian schools serving four user roles: School Administration, Teachers, Parents, and Students. The key differentiator is "Pixel Trace" — an AI-powered face recognition system for event photo discovery.
+StudyDash is a unified school management platform for Indian schools serving five user roles: Admin, Teacher, Parent, Student, and Driver. The key differentiator is "Pixel Trace" — an AI-powered face recognition system for event photo discovery (post-MVP).
 
-**Status**: Specification and planning phase. No implementation code exists yet. See `PRODUCT_SPEC.md` for the full technical spec and `Personas/` for role-specific requirements.
+**Status**: Specification complete. MVP scope locked. Implementation not started.
 
-## Planned Tech Stack
+## MVP Scope (10 features)
 
-- **Backend**: Node.js + TypeScript, Prisma ORM
-- **Mobile**: React Native (iOS/Android) with Expo push notifications
-- **Database**: PostgreSQL (multi-tenant, all queries scoped by `schoolId`)
-- **Auth**: JWT — access tokens (15 min), refresh tokens (30 days, stored hashed)
-- **Job Queues**: BullMQ for background tasks (reminders, report generation, media processing)
-- **Storage**: AWS S3 for documents/media, Google Drive API for event photos
-- **Payments**: Razorpay or Cashfree
-- **Messaging**: WhatsApp Business API (Gupshup/Interakt), SMS fallback
-- **PDF Generation**: Puppeteer (report cards, transfer certificates)
-- **Face Recognition**: Custom embedding pipeline for Pixel Trace
+1. School Onboarding (wizard + CSV bulk import)
+2. Digital Attendance (manual, teacher-marked)
+3. Homework & Class Notes
+4. Timetable
+5. Fees Payment (Razorpay + offline recording)
+6. Communication Channel (announcements + complaint tickets)
+7. Leave Applications
+8. Push Notifications (FCM/APNs)
+9. GPS Bus Tracking (driver phone GPS)
+10. Expense Tracker (admin-only)
+
+## Platforms
+
+- **Mobile app (React Native/Expo):** Teachers, Parents, Students, Drivers
+- **Web admin panel (Next.js):** School Administration
+
+## Tech Stack
+
+- **Backend**: Node.js + TypeScript + Express, Prisma ORM + PostgreSQL
+- **Mobile**: React Native (Expo)
+- **Web Admin**: Next.js + React
+- **Storage**: AWS S3 (presigned URLs), path: `{schoolId}/{feature}/{entityId}/{filename}`
+- **Queue**: BullMQ + Redis (notifications, PDFs, CSV processing, thumbnails)
+- **Payments**: Razorpay (webhook + signature verification)
+- **OTP**: MSG91 or Twilio
+- **Push**: Firebase Cloud Messaging
+- **PDF**: Puppeteer
+
+## Authentication
+
+- Parents, Students, Drivers: Phone + SMS OTP
+- Teachers: Email + Password
+- Admin: Email + Password
+- JWT access tokens (15 min) + refresh tokens (30 days mobile, 7 days admin)
+- RS256 signing, bcrypt password hashing (12 rounds)
 
 ## Architecture Decisions
 
-- **Multi-tenancy**: Every database query and API endpoint must be scoped by `schoolId`. This is the primary data isolation boundary.
-- **RBAC**: Four roles (ADMIN, TEACHER, PARENT, STUDENT) with granular feature-level permissions.
-- **Offline-first mobile**: Local caching with auto-sync on reconnect.
-- **Notification chain**: Push notification → WhatsApp → SMS fallback.
-- **DPDP Act compliance**: Consent management required for biometric data (Pixel Trace). Face embeddings stored as vectors, not raw biometric templates. Strict opt-in with revocation support.
-- **India-specific**: UDISE+ export, TRAI-compliant WhatsApp templates, board-specific grading (CBSE/ICSE/State Board).
-
-## Feature Phases
-
-- **v1 (Core)**: GPS bus tracking, digital attendance, fees payment, communication channel, timetable/calendar, homework/class notes
-- **v1.5 (Differentiation)**: Pixel Trace, WhatsApp integration, PTM scheduler, library management
-- **v2 (AI)**: AI attendance (classroom photo → auto roll call), board-specific report cards, admission/enrollment management
+- **Multi-tenancy**: All queries scoped by `schoolId` from JWT. S3 paths prefixed by schoolId.
+- **RBAC**: Five roles (ADMIN, TEACHER, PARENT, STUDENT, DRIVER) with role-based route prefixes (`/api/v1/admin/`, `/api/v1/teachers/`, etc.)
+- **API**: RESTful, cursor-based pagination, standard error format `{ error, code, details? }`
+- **Rate limiting**: 100 req/min per user, 5 OTP/hour per phone
+- **Background jobs**: BullMQ with 3 retries, exponential backoff, dead letter queue
+- **File uploads**: 25MB max, MIME type validation, presigned URLs
 
 ## Key Specification Files
 
 | File | Contains |
 |------|----------|
-| `PRODUCT_SPEC.md` | Complete technical specification |
-| `FEATURE_BREIF.md` | High-level feature overview |
-| `FEATURES.md` | Detailed feature list by role |
-| `PLAN.md` | Development phases roadmap |
-| `Personas/Student_Persona.md` | Auth flows, DB schema examples, API patterns |
-| `Personas/Teacher_Persona.md` | Teacher workflows and feature access |
-| `Personas/Parent_Persona.md` | Parent app features |
-| `Personas/School_Management_Persona.md` | Admin features and management |
+| `MVP.md` | Locked MVP design spec with all feature details |
+| `PITCH.md` | Investor-facing pitch document |
+| `PRODUCT_SPEC.md` | Full technical specification (MVP + post-MVP) |
+| `FEATURES.md` | Feature list organized by role and platform |
+| `FEATURE_BREIF.md` | High-level feature summaries and roadmap |
+| `PLAN.md` | Development phases and implementation order |
+| `Personas/*.md` | Role-specific technical implementation details (schemas, APIs, flows) |
+
+## Post-MVP Roadmap (in order)
+
+1. Pixel Trace Light (manual tagging)
+2. Pixel Trace AI (face recognition)
+3. WhatsApp Integration
+4. School Email Provisioning
+5. PTM Scheduler
+6. Library Management
+7. AI Attendance
+8. Board-Specific Report Cards
+9. Admission & Enrollment

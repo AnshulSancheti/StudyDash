@@ -1,3 +1,5 @@
+> **Note:** This persona was written before the MVP scope was locked. MVP features: Auth (Email+Password), School onboarding (wizard + CSV import), Attendance reports/override, Fee management, Timetable config, Broadcasts, Ticket management, Bus route config, Expense tracker, Notifications. Admin uses a **Next.js web panel**, not the mobile app. Features like PixelTrace moderation, Admission management, Library, PTM, and Board report cards are post-MVP. See `MVP.md` for the canonical spec. The technical implementation details in this file remain useful reference.
+
 # School Management (Admin) Persona: Features & Technical Implementation
 
 ## Persona Overview

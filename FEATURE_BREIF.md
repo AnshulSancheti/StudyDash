@@ -1,88 +1,94 @@
-# StudyDash — Feature Overview
+# StudyDash — Feature Brief
 
-StudyDash is a unified school management platform serving **Admins, Teachers, Parents, and Students**. Below is a brief description of all planned features.
+StudyDash is a unified school management platform for Indian schools serving **Admins, Teachers, Parents, Students, and Drivers**. Mobile app for teachers/parents/students/drivers, web admin panel for school administration.
 
 ---
 
-## Core Features (v1 Launch)
+## MVP Features
 
-### 1. GPS Bus Tracking
-Real-time map tracking of school buses with estimated arrival times at each stop. Parents receive push notifications when the bus is nearby and when their child boards or alights.
+### 1. School Onboarding
+Self-service setup for schools. Guided wizard for school profile, classes, subjects, fee heads, and bus routes. CSV bulk import for students (with auto-generated parent accounts), teachers, and drivers. Row-level validation and error reporting.
 
 ### 2. Digital Attendance
-Teachers mark attendance digitally per period via a class roster. Parents are instantly notified of absences. Admins get daily/weekly/monthly reports and automatic alerts when a student's attendance falls below the threshold.
+Teachers mark attendance digitally per class (Present, Absent, Late). Parents get instant push notifications on absence. Students see a color-coded monthly calendar. Admins get compliance reports showing which teachers have/haven't marked attendance.
 
-### 3. Fees Payment
-Parents can pay school fees online (UPI, cards, net banking). Supports installment plans, automated due reminders, PDF receipt generation, and concession/scholarship tracking. Admins get defaulter reports and full payment history.
+### 3. Homework & Class Notes
+Teachers post assignments with due dates and file attachments, and upload class notes. Students view, download, bookmark, and mark assignments complete. Parents get read-only access and push notifications for new assignments.
 
-### 4. Communication Channel
-Structured in-app messaging replacing unorganized WhatsApp groups. Teachers can send direct updates or class-wide broadcasts to parents. Parents can raise complaints through a ticket-style flow (submitted → acknowledged → resolved) with full escalation history.
+### 4. Timetable
+Admin configures class schedules (periods, subjects, teachers). Students, parents, and teachers each see their relevant view (today + weekly).
 
-### 5. Timetable & Calendar
-Class-wise and teacher-wise timetables with real-time substitution updates. School-wide academic calendar with holidays, exams, PTM dates, and events. Supports device calendar sync and configurable event reminders.
+### 5. Fees Payment
+Online fee payment via Razorpay (UPI, cards, net banking) with partial payment support. Admin creates fee structures, generates invoices, records offline payments, and runs defaulter reports. Automated due date reminders. PDF receipt generation.
 
-### 6. Homework & Class Notes
-Teachers post homework assignments per subject with due dates and optional file attachments. Parents and students are notified. Class notes (photos or files) can be attached to each period for student reference.
+### 6. Communication Channel
+Structured in-app messaging replacing WhatsApp groups. Teacher class-wide announcements, parent complaint/query tickets (tracked to resolution), admin school-wide broadcasts.
 
-### 7. Pixel Trace — Event Photo Discovery *(USP)*
-AI-powered photo discovery for school events. Parents search by their child's name and receive all event photos containing that student, organized by event (Sports Day, Annual Function, etc.). Strictly opt-in with explicit parent consent; face data is deleted on consent revocation. Compliant with India's DPDP Act.
+### 7. Leave Applications
+Parents submit digital leave requests for their child. Teachers approve/reject. Approved leaves auto-update attendance records to ON_LEAVE with conflict checking.
 
-### 8. AI Attendance *(v2 — after Pixel Trace is validated)*
-Teacher takes a single classroom photo; the AI auto-marks attendance and generates an absentee list for teacher verification. Built on the same face model trained through Pixel Trace. Teacher confirmation is mandatory before submission.
+### 8. Push Notifications
+Event-driven notifications via FCM/APNs: absence alerts, new homework, fee reminders, payment confirmations, leave status changes, bus alerts, announcements. In-app notification history.
 
-### 9. Academic Records & Report Cards
-Exam-wise marks entry by teachers. Auto-calculated totals, percentages, and grades. PDF report card generation. Historical performance trends for parents and class-wide analytics for teachers.
+### 9. GPS Bus Tracking
+Live bus tracking using driver's phone GPS (no hardware needed). Parents see bus on a map with ETA to their stop. Notifications for route start and bus approaching stop (500m geofence). Admin configures routes, stops, and driver assignments.
 
-### 10. Leave Applications
-Parents submit student leave requests digitally; class teachers approve or reject with comments. Approved leaves auto-update attendance records. Teacher leave triggers a substitute assignment workflow linked to the timetable.
-
-### 11. WhatsApp Integration
-Automated school alerts (absence, fee reminders, homework) delivered via WhatsApp Business API — the channel parents already check. Serves as a reliable fallback when push notifications go undelivered. Parents can reply to acknowledge messages. Uses TRAI-compliant templates via Gupshup or Interakt.
-
-### 12. Board-Specific Grading & Report Cards
-Configurable grading system supporting CBSE (9-point scale with co-scholastic areas), ICSE (percentage-based), and State Board formats. Admins set exam weightage per board; teachers enter marks in the appropriate format; the system auto-calculates grades and generates board-compliant PDF report cards in bulk. Includes UDISE+ data export for government compliance.
-
-### 13. Admission & Enrollment Management
-End-to-end digital admission flow: online inquiry forms, document upload (Aadhaar, birth certificate, previous TC), waitlist management with auto-notification on seat availability, and fee collection at admission. Transfer Certificate (TC) generation for outgoing students. Reduces dependency on walk-in paperwork and manual registers.
-
-### 14. PTM Scheduler
-Admins create Parent-Teacher Meeting events with configurable time slots per teacher. Parents book slots online; teachers see their full appointment schedule for the PTM day. Automated reminders sent 1 day and 1 hour before each slot. After the meeting, teachers add per-student notes visible to the parent, building a structured communication trail.
-
-### 15. Library Management
-Digital library system covering book issue/return with barcode lookup, due date reminders, and overdue fine calculation. Students can browse the catalog, check availability, and access a digital resources section (NCERT PDFs, sample papers, question banks). Borrowing history and overdue status visible to students and parents.
+### 10. Expense Tracker
+Simple expense logging for school admin. Categories (Salaries, Maintenance, Utilities, Events, etc.), receipt uploads, monthly summaries with pie charts. No budgeting, no approval workflows — just a clean expense log.
 
 ---
 
-## Admin & Management Features
+## Post-MVP Roadmap
 
-### 16. Teacher Management
-Teacher attendance tracking, salary management with payslip generation, substitute teacher pool, and assignment flow integrated with the timetable.
-
-### 17. User & Role Management
-Full user management for students, teachers, and staff. Role-based access control (RBAC) ensuring each user sees only what they're permitted to.
-
-### 18. Analytics & Reporting
-Dashboards for assignment completion rates, attendance trends, fee collection status, notification delivery metrics, and Pixel Trace usage and accuracy.
-
----
-
-## Platform-Wide Capabilities
-
-| Capability | Description |
-|---|---|
-| **Push Notifications** | Real-time alerts for attendance, fees, messages, homework, and bus arrival |
-| **Offline Access** | Cached content accessible without internet; auto-syncs on reconnect |
-| **Security** | JWT auth, role-based permissions, data encryption in transit and at rest |
-| **Privacy & Compliance** | DPDP Act (India) compliance; consent management for minors' biometric data |
-| **Integrations** | School ERP/SIS sync, Google Drive (Pixel Trace), calendar export, SMS fallback, WhatsApp Business API |
+| Phase | Feature | Description |
+|-------|---------|-------------|
+| v1.5a | Pixel Trace Light | Manual photo tagging by teachers, consent-gated viewing by parents/students |
+| v1.5b | Pixel Trace AI | Face recognition auto-matching with moderation queue |
+| v1.5c | WhatsApp Integration | Automated alerts via WhatsApp Business API, fallback chain |
+| v2a | School Email Provisioning | Google Workspace / Microsoft 365 student email management |
+| v2b | PTM Scheduler | Parent-teacher meeting slot booking with reminders |
+| v2c | Library Management | Book catalog, issue/return, fines, digital resources |
+| v2d | AI Attendance | Classroom photo → auto roll call (requires Pixel Trace maturity) |
+| v2e | Board Report Cards | CBSE/ICSE/State Board format PDF generation |
+| v2f | Admission & Enrollment | Online inquiry → application → document upload → enrollment |
+| v3 | Advanced Analytics | Multi-school dashboards, SIS integrations |
 
 ---
 
-## Release Roadmap Summary
+## Tech Stack
 
-| Phase              | Scope                                                                                       |
-| ------------------ | ------------------------------------------------------------------------------------------- |
-| **v1 — Launch**    | Bus GPS, Digital Attendance, Fees, Communication, Timetable, Homework                       |
-| **v1.5**           | Pixel Trace (event photo matching), WhatsApp Integration, PTM Scheduler, Library Management |
-| **v2**             | AI Attendance (classroom photo → auto roll call), Board Report Cards, Admission Management  |
-| **v3 / On Demand** | Advanced analytics, SIS integrations                                                        |
+| Layer | Technology |
+|-------|-----------|
+| Backend | Node.js + TypeScript + Express |
+| Database | Prisma + PostgreSQL |
+| Mobile | React Native (Expo) |
+| Web Admin | Next.js + React |
+| Storage | AWS S3 |
+| Queue | BullMQ + Redis |
+| Payments | Razorpay |
+| OTP | MSG91 or Twilio |
+| Push | Firebase Cloud Messaging |
+| PDF | Puppeteer |
+
+---
+
+## Authentication
+
+| Role | Method | Platform |
+|------|--------|----------|
+| Parents & Students | Phone + SMS OTP | Mobile app |
+| Teachers | Email + Password | Mobile app |
+| Admin | Email + Password | Web panel |
+| Drivers | Phone + SMS OTP | Mobile app |
+
+---
+
+## User Roles
+
+| Role | Access |
+|------|--------|
+| **Admin** | Web panel — full school config, user management, fees, reports, expenses, bus routes |
+| **Teacher** | Mobile — attendance, assignments, notes, leave approvals, announcements |
+| **Parent** | Mobile — child's attendance/homework/fees/bus/leave, complaints, multi-child support |
+| **Student** | Mobile — own attendance/homework/notes/timetable/bus |
+| **Driver** | Mobile — start/end route, GPS streaming |

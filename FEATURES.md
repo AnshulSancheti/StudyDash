@@ -1,287 +1,219 @@
-# Student Dashboard App: Potential Features
+# StudyDash — Feature List
 
-## 1) Core Product Areas
-- Assignments
-- Class Notes
-- Attendance
-- Notifications
-- PixelTrace (event photo discovery)
-- Student profile and academic overview
-- Admission & Enrollment Management
-- Library Management
-- PTM (Parent-Teacher Meeting) Scheduling
-- Board-Specific Grading & Report Cards
-- WhatsApp Integration
+## MVP Features
 
----
+### Student App (Mobile)
 
-## 2) Student App Features
-
-## Dashboard Home
+**Dashboard Home**
 - Today overview (classes, assignments due, attendance status, new notifications)
-- Weekly snapshot (upcoming deadlines and events)
-- Quick actions (view notes, mark assignment done, open PixelTrace)
+- Weekly snapshot (upcoming deadlines)
+- Quick actions (view notes, mark assignment done)
 
-## Assignments
+**Assignments**
 - Daily and weekly assignment feed
 - Subject/class filters
-- Assignment details (instructions, attachments, due date/time)
+- Assignment details (instructions, attachments, due date)
 - Mark as complete/incomplete
 - Late/missed assignment highlighting
 - Reminders before due time
-- Personal notes per assignment
 
-## Class Notes
+**Class Notes**
 - Notes list by date and subject
 - File preview for PDF/images
 - Download and offline access
 - Bookmark important notes
 - Search by keyword, class, date
-- “Recently uploaded” section
 
-## Attendance
+**Attendance**
 - Daily attendance status
-- Monthly attendance calendar
+- Monthly attendance calendar (color-coded)
 - Attendance percentage and trends
-- Absent/late history
-- Attendance alerts (low percentage warning)
 
-## Notifications
+**Timetable**
+- Today view + weekly view
+- Period details (subject, teacher, time)
+
+**Bus Tracking**
+- Map view of bus location
+- ETA to their stop
+- Push notification when bus is approaching
+
+**Notifications**
 - In-app notification inbox
 - Push notifications for urgent announcements
 - Read/unread states
-- Priority labels (urgent, normal, informational)
 - Notification filters (school, class, personal)
-- Quiet hours preferences
 
-## PixelTrace
-- Search photos by student name
-- Event-wise photo organization
-- Date-wise browsing
-- Photo zoom/download/share link (policy-based)
-- “This is not me” mismatch report
-- Favorite photos collection
-
-## Library (Student View)
-- Browse book catalog by title, author, subject
-- View current borrowed books and due dates
-- Digital resources section (NCERT PDFs, sample papers, study material)
-- Overdue book reminders
-- Reading history
-
-## Report Card (Student View)
-- View board-specific report card (CBSE 9-point scale / ICSE percentage / State Board)
-- Subject-wise marks breakdown
-- Historical report cards by academic session
-
-## Profile and Settings
+**Profile and Settings**
 - Student profile view
 - Class/section details
-- Password reset and secure sign-out
 - Language preference
-- Theme/accessibility settings (font size, contrast)
+- Theme/accessibility settings
 
 ---
 
-## 3) Teacher App Features
+### Teacher App (Mobile)
+
+**Assignments**
 - Create, edit, delete assignments
-- Attach files/resources to assignments
-- Upload class notes daily
-- Mark and edit attendance
-- Send class-specific notifications
-- View assignment completion summary
-- View note download/read stats
-- Event photo upload for PixelTrace
-- Manual photo tagging workflow
-- Flag incorrect tags for moderation
-- Enter marks in board-specific format (CBSE/ICSE/State Board)
-- View PTM appointment schedule for the day
-- Add post-PTM notes per student (visible to parent)
-- Issue and return library books for students
+- Attach files/resources
+- View assignment completion summary per class
+
+**Class Notes**
+- Upload notes (PDF, images, docs)
+- View download stats per note
+
+**Attendance**
+- Mark attendance per class/section (Present, Absent, Late)
+- Edit within same day
+- View class attendance summary
+
+**Leave Management**
+- View pending leave requests for their classes
+- Approve or reject with remarks
+- View leave history per student
+
+**Communication**
+- Send class-wide announcements
+- View and respond to parent messages
+
+**Timetable**
+- View teaching schedule across all classes
+- Today view + weekly view
+
+**Notifications**
+- Receive push notifications
+- In-app notification history
 
 ---
 
-## 4) Admin Features
-- Manage users (students, teachers, staff)
-- Manage classes/sections/subjects
+### Parent App (Mobile)
+
+**Multi-Child Support**
+- Switch between children (if multiple enrolled)
+- Per-child views for all features
+
+**Attendance**
+- View child's daily status and monthly calendar
+- Attendance percentage
+- Instant absence alert (push notification)
+
+**Assignments & Notes**
+- Read-only view of assignments and completion status
+- Read-only view of class notes
+
+**Fees**
+- View outstanding fees (itemized)
+- Pay online via Razorpay (full or partial)
+- View payment history
+- Download receipts (PDF)
+- Fee due and overdue reminders
+
+**Communication**
+- View class announcements
+- Submit complaints/queries (ticket-based)
+- Track ticket status
+
+**Leave Applications**
+- Submit leave request for child
+- View request history and status
+
+**Bus Tracking**
+- Live map view of child's bus
+- ETA to stop
+- "Bus approaching" notification
+
+**Timetable**
+- View child's timetable (read-only)
+
+---
+
+### Driver App (Mobile)
+
+**Route Management**
+- Start/end route
+- View route stops in order
+- GPS location streamed every 10 seconds
+
+---
+
+### Admin Web Panel
+
+**School Onboarding**
+- Setup wizard (school profile, classes, subjects, fee heads, routes)
+- CSV bulk import (students, teachers, drivers)
+- Validation with error reporting
+
+**User Management**
+- View/edit/deactivate students, teachers, parents, drivers
 - Role and permission management
-- School-wide announcements
-- Academic calendar and event management
-- Bulk student import/export
 - Audit logs for sensitive actions
-- Data correction tools (attendance/identity fixes)
-- PixelTrace moderation queue
-- Storage and usage dashboard
-- Admission & Enrollment Management (inquiry tracking, online forms, waitlist, TC generation)
-- Library catalog setup and book management
-- PTM event scheduling and slot management
-- Board/grading scheme configuration (CBSE, ICSE, State Board)
-- Report card template management and bulk generation
-- WhatsApp broadcast channel configuration
+
+**Attendance**
+- Compliance report (which teachers marked, which didn't)
+- Class-wise summary
+- Override/correct records
+
+**Fee Management**
+- Fee structure configuration per class
+- Invoice generation (auto/manual)
+- Record offline payments
+- Payment status dashboard
+- Defaulter reports
+- Collection reports (CSV/PDF)
+
+**Communication**
+- School-wide broadcasts
+- Complaint ticket management (assign, respond, resolve)
+- Ticket dashboard with filters
+
+**Timetable**
+- Configure per class/section (periods, subjects, teachers, time slots)
+- Break and lunch configuration
+
+**Bus Tracking**
+- Define routes and stops
+- Assign drivers to routes
+- Assign students to stops
+- Live map of all active buses
+- Route history
+
+**Expense Tracker**
+- Log expenses (amount, category, date, description, receipt)
+- Category management (predefined + custom)
+- Expense list with filters
+- Monthly summary with pie chart
+- Month-over-month comparison
+
+**Analytics**
+- Attendance trends
+- Fee collection status
+- Notification delivery metrics
 
 ---
 
-## 5) Parent Features (Optional)
-- Child attendance overview
-- Assignment and due date visibility
-- School notifications feed
-- Absence alerts
-- Parent-teacher communication request flow
-- Online admission application and status tracking
-- PTM slot booking and appointment management
-- Receive absence/fee/homework alerts via WhatsApp
-- View child's report card (board-specific format)
-- View child's library borrowing status
+## Post-MVP Features (in priority order)
+
+1. **Pixel Trace Light** — Manual photo tagging, consent-gated viewing
+2. **Pixel Trace AI** — Face recognition matching with moderation queue
+3. **WhatsApp Integration** — Notification fallback chain (push → WhatsApp → SMS)
+4. **School Email Provisioning** — Google Workspace / Microsoft 365 student emails
+5. **PTM Scheduler** — Slot booking, reminders, post-meeting teacher notes
+6. **Library Management** — Catalog, issue/return, fines, digital resources
+7. **AI Attendance** — Classroom photo → auto roll call
+8. **Board-Specific Report Cards** — CBSE/ICSE/State Board PDF generation
+9. **Admission & Enrollment** — Online inquiry, waitlist, document upload, TC generation
+10. **Advanced Analytics** — Multi-school dashboards, SIS integrations
 
 ---
 
-## 6) PixelTrace Advanced Features (Roadmap)
-- Face clustering to reduce manual tagging effort
-- Consent-based student face enrollment
-- Confidence-based auto-match suggestions
-- Human verification queue for low-confidence matches
-- Multi-photo “best shots” auto-selection
-- Event albums auto-created from uploads
-- Duplicate/blur detection
-- Privacy controls (download restrictions, watermarking)
-- Retention policy and auto-archive rules
+## Platform-Wide Capabilities
 
----
-
-## 7) Search and Discovery Features
-- Global search across assignments, notes, notifications, events
-- Smart filters by date/class/subject
-- Saved searches
-- Recent search history
-
----
-
-## 8) Communication Features
-- Broadcast notifications (school-wide)
-- Segment notifications (class, grade, section)
-- Scheduled announcements
-- Notification delivery/open analytics
-- In-app acknowledgement for critical notices
-- WhatsApp Business API integration for automated alerts (absence, fees, homework)
-- Two-way WhatsApp messaging (parent can reply to acknowledge)
-- WhatsApp as fallback when push notification undelivered
-
----
-
-## 9) Reporting and Analytics
-- Student engagement metrics (DAU/WAU)
-- Assignment completion analytics
-- Attendance trend reports by class/grade
-- Notes upload consistency by teachers
-- Notification effectiveness metrics
-- PixelTrace usage and mismatch rates
-
----
-
-## 10) Offline and Sync Features
-- Offline access to cached assignments/notes metadata
-- Offline queue for teacher actions (optional)
-- Auto-sync on reconnect
-- Conflict resolution rules for edits
-- Last synced timestamp indicators
-
----
-
-## 11) Security, Privacy, and Compliance Features
-- Role-based access control (RBAC)
-- JWT + refresh token session management
-- Device/session management
-- Data encryption in transit and at rest
-- Consent management for minors and photo matching
-- Audit trails for all sensitive operations
-- Data retention and deletion policies
-- Privacy request workflow (view/delete personal data)
-
----
-
-## 12) Performance and Reliability Features
-- Fast startup with local cache
-- Pagination and lazy loading for large lists
-- Background jobs for media processing
-- CDN delivery for notes/photos
-- Crash reporting and diagnostics
-- Status page for backend/service health
-
----
-
-## 13) Integration Features
-- School ERP/SIS integration (student roster sync)
-- Timetable integration
-- Calendar integration (Google/Apple calendar export)
-- Cloud storage integration for note imports
-- SMS/email fallback for critical alerts
-- WhatsApp Business API (Gupshup/Interakt) for automated notifications
-
----
-
-## 17) Admission & Enrollment Management
-- Online admission inquiry form with document upload
-- Inquiry lead tracking (walk-in, referral, online source)
-- Waitlist management with auto-notification on seat availability
-- Fee collection at admission stage
-- Transfer Certificate (TC) generation for outgoing students
-- Bulk student enrollment at session start
-
----
-
-## 18) Library Management
-- Book catalog with ISBN/barcode lookup
-- Issue and return tracking per student
-- Due date reminders and overdue fine calculation
-- Digital resource section (NCERT PDFs, sample papers, question banks)
-- Library card integration with student profile
-- Book availability status visible to students/parents
-
----
-
-## 19) PTM (Parent-Teacher Meeting) Scheduler
-- Admin creates PTM event with available time slots per teacher
-- Parents book slots online (first-come or assigned)
-- Teacher sees full appointment schedule for PTM day
-- Automated reminders (1 day and 1 hour before slot)
-- Post-PTM: teacher adds per-student notes visible to parent
-- PTM history and follow-up action tracking
-
----
-
-## 20) Board-Specific Grading & Report Cards
-- Configurable grading schemes (CBSE 9-point, ICSE percentage, State Board marks)
-- Exam weightage configuration per board (unit test %, half-yearly %, annual %)
-- Co-scholastic area tracking (mandatory for CBSE)
-- Board-specific PDF report card templates
-- Bulk report card generation per class
-- UDISE+ data export for government compliance
-
----
-
-## 14) Monetization / Tiering (If Needed)
-- Free core plan for schools
-- Premium analytics package
-- Premium PixelTrace automation package
-- Higher storage tiers
-- Priority support tier
-
----
-
-## 15) MVP Feature Set (Build First)
-- Student login and role-based access
-- Assignments (create/view/complete)
-- Class notes upload and viewing
-- Attendance recording and student summary
-- Notifications (push + in-app inbox)
-- PixelTrace v1 with manual photo tagging
-
----
-
-## 16) Post-MVP Priorities
-- Parent app features
-- PixelTrace AI matching with moderation
-- Advanced analytics dashboards
-- SIS integration
-- Offline-first improvements
-- Multi-language expansion
+| Capability | Description |
+|---|---|
+| **Push Notifications** | FCM + APNs for attendance, fees, messages, homework, bus alerts |
+| **Offline Access** | Cached content accessible without internet; auto-syncs on reconnect |
+| **Security** | JWT (RS256), bcrypt passwords, RBAC, input validation, MIME type checks |
+| **Multi-Tenancy** | All data scoped by schoolId; S3 paths prefixed by schoolId |
+| **Background Jobs** | BullMQ queues for notifications, PDFs, CSV processing, thumbnails |
+| **File Storage** | AWS S3 with presigned URLs; 25MB max per upload |
