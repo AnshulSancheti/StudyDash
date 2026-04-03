@@ -80,9 +80,9 @@ Dashboards for assignment completion rates, attendance trends, fee collection st
 
 ## Release Roadmap Summary
 
-| Phase | Scope |
-|---|---|
-| **v1 — Launch** | Bus GPS, Digital Attendance, Fees, Communication, Timetable, Homework |
-| **v1.5** | Pixel Trace (event photo matching), WhatsApp Integration, PTM Scheduler, Library Management |
-| **v2** | AI Attendance (classroom photo → auto roll call), Board Report Cards, Admission Management |
-| **v3 / On Demand** | Advanced analytics, SIS integrations |
+| Phase              | Scope                                                                                       |
+| ------------------ | ------------------------------------------------------------------------------------------- |
+| **v1 — Launch**    | Bus GPS, Digital Attendance, Fees, Communication, Timetable, Homework                       |
+| **v1.5**           | Pixel Trace (event photo matching), WhatsApp Integration, PTM Scheduler, Library Management |
+| **v2**             | AI Attendance (classroom photo → auto roll call), Board Report Cards, Admission Management  |
+| **v3 / On Demand** | Advanced analytics, SIS integrations                                                        |
